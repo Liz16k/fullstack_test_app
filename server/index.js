@@ -3,6 +3,8 @@ import news from './news.js';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
+import UserModel from './models/User.js';
+
 dotenv.config();
 
 mongoose
@@ -42,8 +44,6 @@ app.get('/news/:id', async (req, res) => {
       });
     }
 
-    //check by id in db
-
     const lastNews = await new Promise((res) => {
       setTimeout(() => {
         res(news[id]);
@@ -60,12 +60,24 @@ app.get('/news/:id', async (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    console.log(req.body);
     const { password, email, fullName } = req.body;
 
-    //create and save to db
+    if(await UserModel.findOne({ email })) {
+      return res.status(409).json({
+        message: 'User with such email already exists',
+      });
+    }
 
-    res.json({ message: 'You have been successfully registered' });
+    const doc = new UserModel({
+      fullName,
+      email,
+      password,
+    });
+
+    const user = await doc.save();
+
+    const { password: _, ...userData } = user._doc;
+    res.json(userData);
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
@@ -77,9 +89,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   try {
     const { password, email } = req.body;
-    const user = { password: '', fullName: '', email: '' };
-
-    //find usser, check password
+    const user = await UserModel.findOne({ email });
 
     if (!user) {
       return res.status(404).json({
@@ -87,15 +97,17 @@ app.post('/login', async (req, res) => {
       });
     }
 
-    const isValidPassword = true;
+    const realPassword = user.password;
+    const isValidPassword = realPassword === password;
 
     if (!isValidPassword) {
-      return res.status(400).json({
+      return res.status(401).json({
         message: 'Wrong login or password',
       });
     }
 
-    res.json({ message: 'You have successfully logged in' });
+    const { password: _, ...userData } = user._doc;
+    res.json(userData);
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
