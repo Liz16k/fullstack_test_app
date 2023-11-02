@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 import NewsController from './controllers/NewsController.js';
 import UserController from './controllers/UserController.js';
+import checkAuthorization from './utils/checkAuthorization.js';
 
 dotenv.config();
 
@@ -19,8 +20,8 @@ app.get('/', (_, res) => {
   res.send({ status: 'OK' });
 });
 
-app.get('/news', NewsController.getAll);
-app.get('/news/:id', NewsController.getById);
+app.get('/news', checkAuthorization, NewsController.getAll);
+app.get('/news/:id', checkAuthorization, NewsController.getById);
 
 app.post('/register', UserController.register);
 app.post('/login', UserController.login);
