@@ -1,8 +1,13 @@
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
 import UserModel from '../models/User.js';
 
 const register = async (req, res) => {
   try {
     const { password, email, fullName } = req.body;
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
 
     if (await UserModel.findOne({ email })) {
       return res.status(409).json({
@@ -13,13 +18,15 @@ const register = async (req, res) => {
     const doc = new UserModel({
       fullName,
       email,
-      password,
+      passwordHash: hash,
     });
 
     const user = await doc.save();
 
-    const { password: _, ...userData } = user._doc;
-    res.json(userData);
+    const token = jwt.sign({ _id: user._id }, process.env.JWTkey, { expiresIn: '7d' });
+
+    const { passwordHash, ...userData } = user._doc;
+    res.json({ ...userData, token });
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
@@ -39,8 +46,7 @@ const login = async (req, res) => {
       });
     }
 
-    const realPassword = user.password;
-    const isValidPassword = realPassword === password;
+    const isValidPassword = await bcrypt.compare(password, user._doc.passwordHash);
 
     if (!isValidPassword) {
       return res.status(401).json({
@@ -48,8 +54,10 @@ const login = async (req, res) => {
       });
     }
 
-    const { password: _, ...userData } = user._doc;
-    res.json(userData);
+    const token = jwt.sign({ _id: user._id }, process.env.JWTkey, { expiresIn: '7d' });
+    
+    const { passwordHash, ...userData } = user._doc;
+    res.json({ ...userData, token });
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
