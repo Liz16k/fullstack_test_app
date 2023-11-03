@@ -1,0 +1,21 @@
+{
+  "extends": ["plugin:react/recommended", "airbnb", "airbnb/hooks"],
+  "plugins": ["react"],
+  "rules": {
+    "react/function-component-definition": [
+      2,
+      {
+        "namedComponents": "arrow-function",
+        "unnamedComponents": "arrow-function"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["index.jsx"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
+}
