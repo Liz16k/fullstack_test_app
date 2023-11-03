@@ -23,10 +23,8 @@ const register = async (req, res) => {
 
     const user = await doc.save();
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWTkey, { expiresIn: '7d' });
-
     const { passwordHash, ...userData } = user._doc;
-    res.json({ ...userData, token });
+    res.json(userData);
   } catch (err) {
     console.log(err.message);
     res.status(500).json({
@@ -54,8 +52,8 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWTkey, { expiresIn: '7d' });
-    
+    const token = jwt.sign({ _id: user._id }, process.env.JWTkey, { expiresIn: '1h' });
+
     const { passwordHash, ...userData } = user._doc;
     res.json({ ...userData, token });
   } catch (err) {

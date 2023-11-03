@@ -2,6 +2,8 @@
   "extends": ["plugin:react/recommended", "airbnb", "airbnb/hooks"],
   "plugins": ["react"],
   "rules": {
+    "react/prop-types": 0,
+    "linebreak-style": ["error", "windows"],
     "react/function-component-definition": [
       2,
       {
