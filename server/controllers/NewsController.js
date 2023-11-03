@@ -1,12 +1,7 @@
-import news from '../news.js';
-
 const getAll = async (_, res) => {
   try {
-    const lastNews = await new Promise((res, rej) => {
-      setTimeout(() => {
-        res(news);
-      }, 1000);
-    });
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const lastNews = await response.json();
     res.json(lastNews);
   } catch (err) {
     console.log(err.message);

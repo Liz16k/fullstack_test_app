@@ -17,6 +17,7 @@ const News = () => {
           'Content-Type': 'application/json',
         },
       });
+
       if (!response.ok) {
         logout();
         navigate('/login');
